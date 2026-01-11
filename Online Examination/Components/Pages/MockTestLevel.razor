@@ -1,0 +1,54 @@
+﻿@page "/mock-test-level"
+
+<PageTitle>Select Level | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/mock-test-level.css">
+</HeadContent>
+
+<section class="level-section">
+    <h1>Select Your Level</h1>
+    <p class="subtitle">Choose the appropriate level for your mock test</p>
+
+    <div class="level-container">
+        <div class="level-card">
+            <div class="level-icon">📚</div>
+            <h2>Primary School</h2>
+            <p>Mock tests for primary school students</p>
+            <ul>
+                <li>Basic Math & English</li>
+                <li>Science Fundamentals</li>
+                <li>General Knowledge</li>
+            </ul>
+            <NavLink href="/exam-index" class="select-btn">Select Level</NavLink>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">🎓</div>
+            <h2>Secondary School</h2>
+            <p>Mock tests for secondary school students</p>
+            <ul>
+                <li>Advanced Mathematics</li>
+                <li>Physics & Chemistry</li>
+                <li>Literature & Languages</li>
+            </ul>
+            <NavLink href="/exam-index" class="select-btn">Select Level</NavLink>
+        </div>
+
+        <div class="level-card">
+            <div class="level-icon">🏆</div>
+            <h2>Polytechnic / JC</h2>
+            <p>Mock tests for polytechnic and junior college</p>
+            <ul>
+                <li>Higher Mathematics</li>
+                <li>Specialized Subjects</li>
+                <li>University Preparation</li>
+            </ul>
+            <NavLink href="/exam-index" class="select-btn">Select Level</NavLink>
+        </div>
+    </div>
+</section>
+
+@code {
+
+}

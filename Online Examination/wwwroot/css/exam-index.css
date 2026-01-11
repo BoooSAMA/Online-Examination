@@ -5,98 +5,162 @@ body {
     color: #333;
 }
 
-/* NAVBAR */
-.navbar {
-    background-color: #000;
-    color: white;
-    padding: 15px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* EXAM INDEX SECTION */
+.exam-index {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.navbar nav a {
-    color: white;
-    margin-left: 25px;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.navbar nav a:hover {
-    text-decoration: underline;
-}
-
-/* EXAM ACCESS */
-.exam-access {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 70vh;
-}
-
-.exam-box {
+/* FILTER BOX */
+.filter-box {
     background: white;
-    width: 400px;
-    padding: 35px;
+    padding: 25px;
     border-radius: 10px;
-    text-align: center;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.exam-box h1 {
-    margin-bottom: 15px;
-    color: #1E3D58;
-}
-
-.exam-box p {
-    margin-bottom: 25px;
-    color: #555;
-}
-
-.exam-box input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-.exam-box button {
-    width: 100%;
-    padding: 12px;
-    background-color: #e63946;
-    color: white;
-    border: none;
-    border-radius: 30px;
+.filter-box input[type="text"] {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
     font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.card-btn {
-    display: inline-block;
-    margin-top: 20px;
-    background-color: #e63946;
-    color: white;
-    padding: 12px 30px;
-    text-decoration: none;
-    border-radius: 30px;
-    font-weight: bold;
+    transition: border-color 0.3s;
 }
 
-.exam-box button:hover {
+.filter-box input[type="text"]:focus {
+    outline: none;
+    border-color: #1E3D58;
+}
+
+.filter-box select {
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.filter-box select:focus {
+    outline: none;
+    border-color: #1E3D58;
+}
+
+/* EXAM LIST */
+.exam-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* EXAM CARD */
+.exam-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.exam-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.exam-card h3 {
+    color: #1E3D58;
+    margin: 0 0 10px 0;
+    font-size: 20px;
+}
+
+.exam-card p {
+    color: #555;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+/* ACTIONS */
+.actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.actions a {
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: #e63946;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.actions a:hover {
     background-color: #c92f3b;
 }
 
-/* FOOTER */
-footer {
-    background-color: #000;
-    color: white;
+.actions .edit-btn {
+    background-color: #1E3D58;
+}
+
+.actions .edit-btn:hover {
+    background-color: #152d42;
+}
+
+.actions .delete-btn {
+    background-color: #888;
+}
+
+.actions .delete-btn:hover {
+    background-color: #666;
+}
+
+/* EMPTY STATE */
+.empty-state {
     text-align: center;
-    padding: 15px;
-    margin-top: 175px;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.empty-state h3 {
+    color: #1E3D58;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #555;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .exam-index {
+        margin: 20px;
+        padding: 10px;
+    }
+
+    .filter-box {
+        flex-direction: column;
+    }
+
+    .filter-box input[type="text"] {
+        min-width: 100%;
+    }
+
+    .exam-list {
+        grid-template-columns: 1fr;
+    }
 }

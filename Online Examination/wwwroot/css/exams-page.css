@@ -25,24 +25,24 @@ body {
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.exam-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-}
+    .exam-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
 
-.exam-card h3 {
-    color: #1E3D58;
-    margin: 0 0 20px 0;
-    font-size: 22px;
-}
+    .exam-card h3 {
+        color: #1E3D58;
+        margin: 0 0 20px 0;
+        font-size: 22px;
+    }
 
-.exam-card p {
-    color: #555;
-    margin: 15px 0;
-    font-size: 15px;
-}
+    .exam-card p {
+        color: #555;
+        margin: 15px 0;
+        font-size: 15px;
+    }
 
-/* STATUS BADGE */
+/* STATUS BADGES */
 .status-badge {
     display: inline-block;
     padding: 5px 15px;
@@ -52,17 +52,17 @@ body {
     margin: 10px 0;
 }
 
-.status-completed {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.status-pending {
+.pending {
     background-color: #fff3cd;
     color: #856404;
 }
 
-/* VIEW BUTTON */
+.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* NAVLINK BUTTONS - 匹配页面中使用的 NavLink */
 .exam-card a {
     display: inline-block;
     margin-top: 20px;
@@ -75,36 +75,39 @@ body {
     transition: background-color 0.3s;
 }
 
-.exam-card a:hover {
-    background: #c92f3b;
-}
-
-/* SCORE PREVIEW */
-.score-preview {
-    font-size: 32px;
-    color: #e63946;
-    font-weight: bold;
-    margin: 15px 0;
-}
+    .exam-card a:hover {
+        background: #c92f3b;
+    }
 
 /* EXAM INFO */
+.exam-info {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    text-align: left;
+}
+
 .exam-info-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
-    border-top: 1px solid #eee;
-    margin-top: 15px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
 }
 
-.exam-info-row span {
-    color: #1E3D58;
-    font-weight: bold;
-}
+    .exam-info-row:last-child {
+        border-bottom: none;
+    }
 
-.exam-info-row .value {
-    color: #555;
-    font-weight: normal;
-}
+    .exam-info-row span {
+        color: #1E3D58;
+        font-weight: bold;
+    }
+
+    .exam-info-row .value {
+        color: #555;
+        font-weight: normal;
+    }
 
 /* EMPTY STATE */
 .empty-state {
@@ -116,16 +119,16 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.empty-state h3 {
-    color: #1E3D58;
-    margin-bottom: 15px;
-    font-size: 24px;
-}
+    .empty-state h3 {
+        color: #1E3D58;
+        margin-bottom: 15px;
+        font-size: 24px;
+    }
 
-.empty-state p {
-    color: #555;
-    font-size: 16px;
-}
+    .empty-state p {
+        color: #555;
+        font-size: 16px;
+    }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
@@ -139,7 +142,7 @@ body {
         padding: 20px;
     }
 
-    .exam-card h3 {
-        font-size: 18px;
-    }
+        .exam-card h3 {
+            font-size: 18px;
+        }
 }

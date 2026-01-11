@@ -1,0 +1,113 @@
+﻿@page "/modify-exams"
+@page "/modify-exams/{examId:int}"
+
+<PageTitle>Modify Exam | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/modify-exams.css">
+</HeadContent>
+
+<section class="editor">
+    <h2>@(ExamId.HasValue ? "Edit Exam" : "Create Exam")</h2>
+
+    <form @onsubmit="HandleSubmit">
+        <div class="form-group">
+            <label>Exam Name</label>
+            <input type="text"
+                   placeholder="Enter exam name"
+                   @bind="examName"
+                   required />
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select @bind="category" required>
+                <option value="">Select Category</option>
+                <option value="Primary School">Primary School</option>
+                <option value="Secondary School">Secondary School</option>
+                <option value="Polytechnic / JC">Polytechnic / JC</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="Enter exam description"
+                      @bind="description"
+                      rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Time Limit (minutes)</label>
+            <input type="number"
+                   placeholder="Enter time limit"
+                   @bind="timeLimit"
+                   min="1"
+                   max="180"
+                   required />
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="save-btn">
+                @(ExamId.HasValue ? "Update Exam" : "Create Exam")
+            </button>
+            <NavLink href="/exam-index" class="cancel-btn">Cancel</NavLink>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="message @messageType">
+            @message
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public int? ExamId { get; set; }
+
+    private string? examName;
+    private string? category;
+    private string? description;
+    private int timeLimit = 60;
+    private string? message;
+    private string messageType = "success";
+
+    protected override void OnInitialized()
+    {
+        if (ExamId.HasValue)
+        {
+            LoadExamData(ExamId.Value);
+        }
+    }
+
+    private void LoadExamData(int id)
+    {
+        // TODO: 从数据库加载
+        examName = "Sample Exam";
+        category = "Primary School";
+        description = "Sample description";
+        timeLimit = 60;
+    }
+
+    private void HandleSubmit()
+    {
+        try
+        {
+            if (ExamId.HasValue)
+            {
+                message = $"Exam '{examName}' updated successfully!";
+            }
+            else
+            {
+                message = $"Exam '{examName}' created successfully!";
+            }
+            messageType = "success";
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+            messageType = "error";
+        }
+    }
+}

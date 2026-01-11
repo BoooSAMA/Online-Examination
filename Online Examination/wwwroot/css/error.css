@@ -1,0 +1,153 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+}
+
+/* ERROR SECTION */
+.error-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 40px 20px;
+}
+
+.error-box {
+    background: white;
+    max-width: 700px;
+    width: 100%;
+    padding: 50px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.error-box h1 {
+    color: #e63946;
+    margin: 0 0 15px 0;
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.error-box h2 {
+    color: #e63946;
+    margin: 0 0 25px 0;
+    font-size: 24px;
+    font-weight: normal;
+}
+
+.error-box p {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.error-box strong {
+    color: #1E3D58;
+}
+
+.error-box code {
+    background-color: #f4f4f4;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #e63946;
+    font-family: 'Courier New', monospace;
+}
+
+/* REQUEST ID */
+.request-id {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #e63946;
+}
+
+/* DEVELOPMENT INFO */
+.dev-info {
+    background-color: #fff8e1;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px;
+    text-align: left;
+    border: 1px solid #ffd54f;
+}
+
+.dev-info h3 {
+    color: #1E3D58;
+    margin-top: 0;
+    font-size: 20px;
+}
+
+.dev-info p {
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+/* BUTTONS */
+.error-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.back-btn {
+    background-color: #1E3D58;
+    color: white;
+    padding: 14px 35px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.back-btn:hover {
+    background-color: #152d42;
+}
+
+.home-btn {
+    background-color: #e63946;
+    color: white;
+    padding: 14px 35px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.home-btn:hover {
+    background-color: #c92f3b;
+}
+
+/* ERROR ICON */
+.error-icon {
+    font-size: 80px;
+    color: #e63946;
+    margin-bottom: 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .error-box {
+        padding: 30px 20px;
+    }
+
+    .error-box h1 {
+        font-size: 36px;
+    }
+
+    .error-box h2 {
+        font-size: 20px;
+    }
+
+    .error-actions {
+        flex-direction: column;
+    }
+}

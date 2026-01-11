@@ -1,0 +1,78 @@
+﻿@page "/payment"
+
+<PageTitle>Payment | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/payment.css">
+</HeadContent>
+
+<section class="payment-section">
+    <div class="payment-box">
+        <h1>Payment</h1>
+        <p class="price">$50.00</p>
+        <p class="description">Premium Exam Package - Unlimited Access</p>
+
+        <form @onsubmit="HandlePayment">
+            <div class="form-group">
+                <label>Cardholder Name</label>
+                <input type="text"
+                       placeholder="Enter name on card"
+                       @bind="cardholderName"
+                       required />
+            </div>
+
+            <div class="form-group">
+                <label>Card Number</label>
+                <input type="text"
+                       placeholder="1234 5678 9012 3456"
+                       @bind="cardNumber"
+                       maxlength="19"
+                       required />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text"
+                           placeholder="MM/YY"
+                           @bind="expiryDate"
+                           maxlength="5"
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label>CVV</label>
+                    <input type="text"
+                           placeholder="123"
+                           @bind="cvv"
+                           maxlength="3"
+                           required />
+                </div>
+            </div>
+
+            <button type="submit" class="pay-btn">Pay Now</button>
+        </form>
+
+        <p class="secure-note">
+            <span class="lock-icon">🔒</span>
+            Your payment is secure and encrypted
+        </p>
+    </div>
+</section>
+
+@code {
+    private string? cardholderName;
+    private string? cardNumber;
+    private string? expiryDate;
+    private string? cvv;
+
+    private void HandlePayment()
+    {
+        // TODO: 处理支付逻辑
+        // 成功后跳转到支付成功页面
+        NavigationManager.NavigateTo("/payment-successful");
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+}

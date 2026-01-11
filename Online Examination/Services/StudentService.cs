@@ -1,65 +1,118 @@
-﻿using Microsoft.EntityFrameworkCore; // 必须引用：为了使用 ToListAsync 等数据库异步方法
-using OnlineExamination.Data;        // 必须引用：为了能找到 DbContext
-using OnlineExamination.Domain;      // 必须引用：为了能找到 Student 类
+﻿using Microsoft.EntityFrameworkCore;
+using Online_Examination.Domain;
+using Online_Examination.Data;
 
-namespace OnlineExamination.Services
+namespace Online_Examination.Services
 {
     public class StudentService
     {
-        // 1. 声明一个私有的数据库上下文变量
-        private readonly OnlineExaminationDbContext _context;
+        private readonly AppDbContext _context;
 
-        // 2. 构造函数 (Constructor)
-        // 当程序创建这个服务时，会自动把配置好的数据库连接 (DbContext) 注入进来
-        public StudentService(OnlineExaminationDbContext context)
+        // 构造函数注入数据库上下文
+        public StudentService(AppDbContext context)
         {
             _context = context;
         }
 
-        // --- 下面是具体的业务方法 ---
+        // ==========================================
+        // 1. 用户认证模块
+        // ==========================================
 
-        // A. 获取所有学生 (Read All)
-        public async Task<List<Student>> GetAllStudentsAsync()
+        // 注册新学生
+        public async Task<User> RegisterStudentAsync(User user)
         {
-            // 相当于 SQL: SELECT * FROM Students
-            // 使用 ToListAsync() 是为了不卡住网页界面
-            return await _context.Students.ToListAsync();
-        }
-
-        // B. 根据 ID 获取单个学生 (Read One)
-        public async Task<Student?> GetStudentByIdAsync(int id)
-        {
-            // 相当于 SQL: SELECT * FROM Students WHERE Id = id
-            return await _context.Students.FindAsync(id);
-        }
-
-        // C. 添加新学生 (Create)
-        public async Task AddStudentAsync(Student student)
-        {
-            // 这一步只是把数据放进内存里的"待保存区"
-            _context.Students.Add(student);
-
-            // 这一步才是真正执行 SQL INSERT 语句
-            await _context.SaveChangesAsync();
-        }
-
-        // D. 更新学生信息 (Update)
-        public async Task UpdateStudentAsync(Student student)
-        {
-            _context.Students.Update(student);
-            await _context.SaveChangesAsync();
-        }
-
-        // E. 删除学生 (Delete)
-        public async Task DeleteStudentAsync(int id)
-        {
-            // 先要把人找出来，才能删
-            var student = await _context.Students.FindAsync(id);
-            if (student != null)
+            // 简单检查邮箱是否已存在
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+            if (existingUser != null)
             {
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
+                throw new Exception("该邮箱已被注册");
             }
+
+            user.Role = "Student";
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        // 学生登录
+        public async Task<User?> LoginAsync(string email, string password)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+
+            return user;
+        }
+
+        // ==========================================
+        // 2. 考试查询模块
+        // ==========================================
+
+        // 获取所有可用的试卷
+        public async Task<List<Exam>> GetAllExamsAsync()
+        {
+            return await _context.Exams.ToListAsync();
+        }
+
+        // 获取单张试卷的详细内容（开始考试用）
+        public async Task<Exam?> GetExamByIdAsync(int examId)
+        {
+            return await _context.Exams
+                .Include(e => e.Questions)
+                .FirstOrDefaultAsync(e => e.Id == examId);
+        }
+
+        // ==========================================
+        // 3. 核心业务：交卷 & 自动判分
+        // ==========================================
+
+        public async Task<Attempt> SubmitExamAsync(int userId, int examId, Dictionary<int, string> studentAnswers)
+        {
+            var exam = await _context.Exams
+                .Include(e => e.Questions)
+                .FirstOrDefaultAsync(e => e.Id == examId);
+
+            if (exam == null) throw new Exception("试卷不存在");
+
+            int finalScore = 0;
+
+            foreach (var question in exam.Questions)
+            {
+                if (studentAnswers.ContainsKey(question.Id))
+                {
+                    string myAnswer = studentAnswers[question.Id];
+
+                    if (string.Equals(myAnswer, question.CorrectAnswer, StringComparison.OrdinalIgnoreCase))
+                    {
+                        finalScore++;
+                    }
+                }
+            }
+
+            var attempt = new Attempt
+            {
+                UserId = userId,
+                ExamId = examId,
+                Score = finalScore,
+            };
+
+            _context.Attempts.Add(attempt);
+            await _context.SaveChangesAsync();
+
+            return attempt;
+        }
+
+        // ==========================================
+        // 4. 历史记录模块
+        // ==========================================
+
+        public async Task<List<Attempt>> GetStudentHistoryAsync(int userId)
+        {
+            return await _context.Attempts
+                .Where(a => a.UserId == userId)
+                .Include(a => a.Exam)
+                .OrderByDescending(a => a.DateCreated)
+                .ToListAsync();
         }
     }
 }

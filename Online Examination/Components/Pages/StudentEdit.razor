@@ -1,0 +1,109 @@
+﻿@page "/edit-student"
+@page "/edit-student/{studentId:int}"
+
+<PageTitle>Edit Student | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/edit-student.css">
+</HeadContent>
+
+<section class="editor">
+    <h2>@(StudentId.HasValue ? "Edit Student" : "Add Student")</h2>
+
+    <form @onsubmit="HandleSubmit">
+        <div class="form-group">
+            <label>Student Name</label>
+            <input type="text"
+                   placeholder="Enter student name"
+                   @bind="studentName"
+                   required />
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email"
+                   placeholder="Enter email address"
+                   @bind="email"
+                   required />
+        </div>
+
+        <div class="form-group">
+            <label>Student Number</label>
+            <input type="text"
+                   placeholder="Enter student number"
+                   @bind="studentNumber"
+                   required />
+        </div>
+
+        <div class="form-group">
+            <label>Organization</label>
+            <input type="text"
+                   placeholder="Enter school/organization"
+                   @bind="organization" />
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="save-btn">
+                @(StudentId.HasValue ? "Update Student" : "Add Student")
+            </button>
+            <NavLink href="/modify-students" class="cancel-btn">Cancel</NavLink>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="message @messageType">
+            @message
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public int? StudentId { get; set; }
+
+    private string? studentName;
+    private string? email;
+    private string? studentNumber;
+    private string? organization;
+    private string? message;
+    private string messageType = "success";
+
+    protected override void OnInitialized()
+    {
+        if (StudentId.HasValue)
+        {
+            LoadStudentData(StudentId.Value);
+        }
+    }
+
+    private void LoadStudentData(int id)
+    {
+        // TODO: 从数据库加载学生数据
+        studentName = "John Doe";
+        email = "john.doe@example.com";
+        studentNumber = "S12345";
+        organization = "Sample School";
+    }
+
+    private void HandleSubmit()
+    {
+        try
+        {
+            if (StudentId.HasValue)
+            {
+                message = $"Student '{studentName}' updated successfully!";
+            }
+            else
+            {
+                message = $"Student '{studentName}' added successfully!";
+            }
+            messageType = "success";
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+            messageType = "error";
+        }
+    }
+}

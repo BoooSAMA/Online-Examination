@@ -1,41 +1,122 @@
 body {
-    background: #7a7a7a;
-    color: white;
-    font-family: Arial;
     margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
 }
 
-.navbar {
-    padding: 15px;
-    background: #000000;
+/* EXAM RESULTS SECTION */
+.exam-results {
+    max-width: 800px;
+    margin: 50px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
     text-align: center;
 }
 
-.results {
-    text-align: center;
-    margin-top: 80px;
+.exam-results h2 {
+    color: #1e3d58;
+    margin-bottom: 20px;
+    font-size: 32px;
+}
+
+.exam-results p {
+    color: #555;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* SCORE DISPLAY */
+.score-box {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    margin: 30px 0;
+    border-left: 5px solid #e63946;
 }
 
 .score {
     font-size: 60px;
-    color: lime;
+    color: #e63946;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.score-label {
+    font-size: 18px;
+    color: #1e3d58;
+    font-weight: bold;
+}
+
+/* RESULT DETAILS */
+.result-details {
+    text-align: left;
+    margin-top: 30px;
+}
+
+.result-details h3 {
+    color: #1e3d58;
+    margin-bottom: 15px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: #f9f9f9;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.result-item span {
+    font-weight: bold;
+}
+
+/* BUTTONS */
+.btn-container {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
 }
 
 .btn {
     display: inline-block;
-    margin-top: 30px;
-    background: red;
-    padding: 12px 25px;
+    background: #e63946;
+    padding: 14px 35px;
     color: white;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 
-/* FOOTER */
-footer {
-    background-color: #000;
-    color: white;
-    text-align: center;
-    padding: 40px;
-    margin-top: 360px;
+.btn:hover {
+    background: #c92f3b;
+}
+
+.btn-secondary {
+    background: #1e3d58;
+}
+
+.btn-secondary:hover {
+    background: #152d42;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .exam-results {
+        margin: 20px;
+        padding: 25px;
+    }
+
+    .score {
+        font-size: 48px;
+    }
+
+    .btn-container {
+        flex-direction: column;
+    }
 }

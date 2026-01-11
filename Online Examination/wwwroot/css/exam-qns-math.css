@@ -111,3 +111,92 @@ footer {
     padding: 15px;
     margin-top: 60px;
 }
+
+/* ========================================= */
+/* EDITOR SECTION - For Exam Question Editor */
+/* ========================================= */
+
+.editor {
+    max-width: 800px;
+    margin: 40px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.editor h3 {
+    color: #1E3D58;
+    margin: 25px 0 10px 0;
+    font-size: 18px;
+}
+
+.editor h3:first-child {
+    margin-top: 0;
+}
+
+/* INPUT FIELDS */
+.editor input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.editor input[type="text"]:focus {
+    outline: none;
+    border-color: #1E3D58;
+}
+
+/* TEXTAREA */
+.editor textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.editor textarea:focus {
+    outline: none;
+    border-color: #1E3D58;
+}
+
+/* BUTTON */
+.editor button {
+    background-color: #e63946;
+    color: white;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.3s;
+}
+
+.editor button:hover {
+    background-color: #c92f3b;
+}
+
+.editor button:active {
+    transform: scale(0.98);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .editor {
+        margin: 20px;
+        padding: 25px;
+    }
+}

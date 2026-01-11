@@ -1,0 +1,48 @@
+﻿@page "/payment-successful"
+
+<PageTitle>Payment Successful | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/payment-successful.css">
+</HeadContent>
+
+<section class="success-section">
+    <div class="success-box">
+        <div class="success-icon">✓</div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase.</p>
+        
+        <div class="order-details">
+            <h3>Order Details</h3>
+            <div class="detail-row">
+                <span>Package:</span>
+                <span>Premium Exam Package</span>
+            </div>
+            <div class="detail-row">
+                <span>Amount Paid:</span>
+                <span class="amount">$50.00</span>
+            </div>
+            <div class="detail-row">
+                <span>Transaction ID:</span>
+                <span>@transactionId</span>
+            </div>
+            <div class="detail-row">
+                <span>Date:</span>
+                <span>@DateTime.Now.ToString("dd MMM yyyy, hh:mm tt")</span>
+            </div>
+        </div>
+
+        <p class="email-note">
+            A confirmation email has been sent to your registered email address.
+        </p>
+
+        <div class="button-group">
+            <NavLink href="/user-dashboard" class="dashboard-btn">Go to Dashboard</NavLink>
+            <NavLink href="/" class="home-btn">Back to Home</NavLink>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string transactionId = Guid.NewGuid().ToString("N").Substring(0, 12).ToUpper();
+}

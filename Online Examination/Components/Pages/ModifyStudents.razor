@@ -1,0 +1,89 @@
+@page "/modify-students"
+
+<PageTitle>Manage Students | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/modify-students.css">
+</HeadContent>
+
+<section class="students-section">
+    <div class="header-row">
+        <h1>Manage Students</h1>
+        <NavLink href="/edit-student" class="add-btn">+ Add Student</NavLink>
+    </div>
+
+    <div class="table-container">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Student Number</th>
+                    <th>Organization</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in students)
+                {
+                    <tr>
+                        <td>@student.Id</td>
+                        <td>@student.Name</td>
+                        <td>@student.Email</td>
+                        <td>@student.StudentNumber</td>
+                        <td>@student.Organization</td>
+                        <td class="actions">
+                            <NavLink href="@($"/edit-student/{student.Id}")" class="edit-btn">Edit</NavLink>
+                            <button @onclick="() => DeleteStudent(student.Id)" class="delete-btn">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!students.Any())
+    {
+        <div class="empty-state">
+            <h3>No Students Found</h3>
+            <p>Click "Add Student" button to add your first student.</p>
+        </div>
+    }
+</section>
+
+@code {
+    private List<StudentInfo> students = new();
+
+    protected override void OnInitialized()
+    {
+        // TODO: 从数据库加载学生数据
+        LoadStudents();
+    }
+
+    private void LoadStudents()
+    {
+        // 示例数据
+        students = new List<StudentInfo>
+        {
+            new StudentInfo { Id = 1, Name = "John Doe", Email = "john@example.com", StudentNumber = "S12345", Organization = "Sample School" },
+            new StudentInfo { Id = 2, Name = "Jane Smith", Email = "jane@example.com", StudentNumber = "S12346", Organization = "Sample School" },
+            new StudentInfo { Id = 3, Name = "Bob Johnson", Email = "bob@example.com", StudentNumber = "S12347", Organization = "Another School" }
+        };
+    }
+
+    private void DeleteStudent(int id)
+    {
+        // TODO: 从数据库删除学生
+        students = students.Where(s => s.Id != id).ToList();
+    }
+
+    private class StudentInfo
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string StudentNumber { get; set; } = string.Empty;
+        public string Organization { get; set; } = string.Empty;
+    }
+}

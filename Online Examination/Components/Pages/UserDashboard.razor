@@ -1,0 +1,28 @@
+﻿@page "/user-dashboard"
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/user-dashboard.css" />
+</HeadContent>
+
+<section class="dashboard">
+    <h1>Welcome, Student</h1>
+    <p>Select an option to continue</p>
+
+    <div class="dashboard-container">
+        <div class="dashboard-card">
+            <h2>My Exams</h2>
+            <p>Access your assigned examinations.</p>
+            <NavLink href="/exam-index" class="card-btn">Enter Exam</NavLink>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>Results</h2>
+            <p>View your examination results.</p>
+            <NavLink href="/exam-results-index" class="card-btn">View Results</NavLink>
+        </div>
+    </div>
+</section>
+
+@code {
+
+}

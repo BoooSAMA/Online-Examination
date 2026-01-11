@@ -1,0 +1,39 @@
+﻿@page "/exam-index"
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/exam-index.css">
+</HeadContent>
+
+<section class="exam-index">
+    <div class="filter-box">
+        <input type="text" placeholder="Search exam name..." />
+        <select>
+            <option>All Categories</option>
+            <option>Primary School</option>
+            <option>Secondary School</option>
+            <option>Polytechnic / JC</option>
+        </select>
+    </div>
+
+    <div class="exam-list">
+        <div class="exam-card">
+            <h3>Primary Mathematics Mock Test</h3>
+            <p>Category: Primary School</p>
+            <div class="actions">
+                <NavLink href="/modify-exams">Edit Exam</NavLink>
+            </div>
+        </div>
+
+        <div class="exam-card">
+            <h3>Secondary Science Final Exam</h3>
+            <p>Category: Secondary School</p>
+            <div class="actions">
+                <NavLink href="/modify-exams">Edit Exam</NavLink>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+
+}

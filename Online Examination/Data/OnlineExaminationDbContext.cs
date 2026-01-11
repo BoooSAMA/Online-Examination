@@ -1,98 +1,57 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OnlineExamination.Domain;
+using Online_Examination.Domain;
 
-namespace OnlineExamination.Data
+namespace Online_Examination.Data
 {
-    public class OnlineExaminationDbContext : DbContext
+    // 必须继承 DbContext
+    public class AppDbContext : DbContext
     {
-        public OnlineExaminationDbContext(DbContextOptions<OnlineExaminationDbContext> options)
-            : base(options)
+        // 1. 构造函数：接受配置选项 (连接字符串等)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
-        // --- 数据库表定义 ---
-        public DbSet<Student> Students { get; set; }
-        public DbSet<Question> Questions { get; set; }
+        // 2. 声明表：告诉 EF Core 数据库里有哪些表
+        public DbSet<User> Users { get; set; }
         public DbSet<Exam> Exams { get; set; }
-        public DbSet<ExamQuestion> ExamQuestions { get; set; }
-        public DbSet<Answer> Answers { get; set; }
-        public DbSet<ExamResult> ExamResults { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Attempt> Attempts { get; set; }
 
+        // 3. 【高级功能】自动管理创建时间和更新时间
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // 找出所有继承了 BaseDomainModel 且状态为“添加”或“修改”的实体
+            var entries = ChangeTracker.Entries<BaseDomainModel>();
+
+            foreach (var entry in entries)
+            {
+                // 如果是新创建的数据
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.DateCreated = DateTime.Now;
+                    entry.Entity.DateUpdated = DateTime.Now;
+                }
+                // 如果是修改过的数据
+                else if (entry.State == EntityState.Modified)
+                {
+                    // 只更新修改时间，创建时间不动
+                    entry.Entity.DateUpdated = DateTime.Now;
+                }
+            }
+
+            // 继续执行原本的保存逻辑
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        // 4. (可选) 配置表关系的细节
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // ============================================================
-            // 🚫 核心修复：全面切断所有“多重级联路径”冲突
-            // 将所有可能构成“三角形”关系的删除行为改为 Restrict (限制)
-            // ============================================================
-
-            // 1. 【修复刚才的报错】ExamQuestions (试卷-题目中间表)
-            // 也就是：删题目时，如果题目还在试卷里，禁止删除（或者手动先移出试卷）
-            modelBuilder.Entity<ExamQuestion>()
-                .HasOne(eq => eq.Question)
-                .WithMany()
-                .HasForeignKey(eq => eq.QuestionId)
-                .OnDelete(DeleteBehavior.Restrict); // <--- 关键修改
-
-            modelBuilder.Entity<ExamQuestion>()
-                .HasOne(eq => eq.Exam)
-                .WithMany(e => e.ExamQuestions)
-                .HasForeignKey(eq => eq.ExamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // 2. Exam 表本身也有一个 QuestionId (你ERD里的特殊设计)
-            // 这也是导致冲突的根源之一：删题目 -> 删试卷 -> 删中间表 (形成了死循环)
-            // 所以必须把这个也关掉：
-            modelBuilder.Entity<Exam>()
-                .HasOne(e => e.Question)
-                .WithMany()
-                .HasForeignKey(e => e.QuestionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // 3. 答案 (Answer) 表
-            modelBuilder.Entity<Answer>()
-                .HasOne(a => a.Question)
-                .WithMany()
-                .HasForeignKey(a => a.QuestionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // 4. 成绩 (ExamResult) 表 - 全部切断自动删除
-            modelBuilder.Entity<ExamResult>()
-                .HasOne(er => er.Exam)
-                .WithMany(e => e.ExamResults)
-                .HasForeignKey(er => er.ExamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ExamResult>()
-                .HasOne(er => er.Student)
-                .WithMany()
-                .HasForeignKey(er => er.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ExamResult>()
-               .HasOne(er => er.Question)
-               .WithMany()
-               .HasForeignKey(er => er.QuestionId)
-               .OnDelete(DeleteBehavior.Restrict);
-
-            // ============================================================
-            // 种子数据 (Seed Data)
-            // ============================================================
-            modelBuilder.Entity<Student>().HasData(
-                new Student
-                {
-                    Id = 1,
-                    Username = "Admin",
-                    Password = "password123",
-                    Email = "admin@school.com",
-                    Role = "Admin",
-                    DateCreated = DateTime.Now,
-                    DateUpdated = DateTime.Now,
-                    CreatedBy = "System",
-                    UpdatedBy = "System"
-                }
-            );
+            // 举例：确保 User 的 Email 是唯一的，不能重复注册
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }

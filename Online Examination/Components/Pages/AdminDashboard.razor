@@ -1,0 +1,82 @@
+@page "/admin-dashboard"
+
+<PageTitle>Admin Dashboard | Examination Board</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</HeadContent>
+
+<section class="dashboard">
+    <h1>Admin Dashboard</h1>
+    <p class="welcome">Welcome back, Administrator</p>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon">??</div>
+            <h3>Total Students</h3>
+            <p class="stat-number">@totalStudents</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">??</div>
+            <h3>Total Exams</h3>
+            <p class="stat-number">@totalExams</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">?</div>
+            <h3>Completed Tests</h3>
+            <p class="stat-number">@completedTests</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">?</div>
+            <h3>Pending Tests</h3>
+            <p class="stat-number">@pendingTests</p>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <div class="action-card">
+            <h2>Manage Exams</h2>
+            <p>Create, edit, or delete examinations</p>
+            <NavLink href="/exam-index" class="action-btn">Go to Exams</NavLink>
+        </div>
+
+        <div class="action-card">
+            <h2>Manage Students</h2>
+            <p>View and manage student accounts</p>
+            <NavLink href="/modify-students" class="action-btn">Go to Students</NavLink>
+        </div>
+
+        <div class="action-card">
+            <h2>View Results</h2>
+            <p>Check exam results and performance</p>
+            <NavLink href="/exam-results-index" class="action-btn">View Results</NavLink>
+        </div>
+
+        <div class="action-card">
+            <h2>Settings</h2>
+            <p>Configure system settings</p>
+            <NavLink href="#" class="action-btn">Settings</NavLink>
+        </div>
+    </div>
+</section>
+
+@code {
+    private int totalStudents = 156;
+    private int totalExams = 42;
+    private int completedTests = 1234;
+    private int pendingTests = 89;
+
+    protected override void OnInitialized()
+    {
+        // TODO: 从数据库加载统计数据
+        LoadDashboardData();
+    }
+
+    private void LoadDashboardData()
+    {
+        // TODO: 实际从数据库查询数据
+    }
+}
