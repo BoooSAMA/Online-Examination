@@ -85,14 +85,21 @@
                 // Store user info in UserSession (scoped service)
                 UserSession.SetUser(user.Id, user.Username, user.Email, user.Role);
 
-                // Navigate based on role
+                // ✅ 修改部分：根据角色进行分流跳转
                 if (user.Role == "Admin")
                 {
+                    // 管理员跳转路径
                     Navigation.NavigateTo("/admin-dashboard");
+                }
+                else if (user.Role == "Student")
+                {
+                    // ✅ 学生跳转路径 (修复了之前跳到 /exams 的问题)
+                    Navigation.NavigateTo("/user-dashboard");
                 }
                 else
                 {
-                    Navigation.NavigateTo("/exams");
+                    // 其他未知角色，默认跳到首页或考试列表
+                    Navigation.NavigateTo("/");
                 }
             }
             else

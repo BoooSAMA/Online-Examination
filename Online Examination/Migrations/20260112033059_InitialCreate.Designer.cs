@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Online_Examination.Data;
 
@@ -11,9 +12,11 @@ using Online_Examination.Data;
 namespace OnlineExamination.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260112033059_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -236,7 +239,7 @@ namespace OnlineExamination.Migrations
                             Password = "123456",
                             Role = "Student",
                             UpdatedBy = "System",
-                            Username = "John"
+                            Username = "ZhangSan"
                         });
                 });
 

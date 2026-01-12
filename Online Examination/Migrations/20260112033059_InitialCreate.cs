@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace OnlineExamination.Migrations
 {
     /// <inheritdoc />
@@ -20,7 +22,7 @@ namespace OnlineExamination.Migrations
                     Username = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     PasswordResetToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PasswordResetTokenExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -119,6 +121,15 @@ namespace OnlineExamination.Migrations
                         principalTable: "Exams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "CreatedBy", "DateCreated", "DateUpdated", "Email", "Password", "PasswordResetToken", "PasswordResetTokenExpiry", "Role", "UpdatedBy", "Username" },
+                values: new object[,]
+                {
+                    { 1, "System", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "admin@school.com", "password123", null, null, "Admin", "System", "Admin" },
+                    { 2, "System", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "student@school.com", "123456", null, null, "Student", "System", "ZhangSan" }
                 });
 
             migrationBuilder.CreateIndex(

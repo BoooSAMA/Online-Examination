@@ -12,8 +12,8 @@ using Online_Examination.Data;
 namespace OnlineExamination.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260112021021_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260112033502_UpdateSeedUsername")]
+    partial class UpdateSeedUsername
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -198,7 +198,8 @@ namespace OnlineExamination.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -214,6 +215,32 @@ namespace OnlineExamination.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "admin@school.com",
+                            Password = "password123",
+                            Role = "Admin",
+                            UpdatedBy = "System",
+                            Username = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "student@school.com",
+                            Password = "123456",
+                            Role = "Student",
+                            UpdatedBy = "System",
+                            Username = "John"
+                        });
                 });
 
             modelBuilder.Entity("Online_Examination.Domain.Attempt", b =>
