@@ -11,7 +11,7 @@ using Online_Examination.Data;
 
 namespace OnlineExamination.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(Online_ExaminationContext))]
     [Migration("20260112111116_InitialCreateWithIdentity")]
     partial class InitialCreateWithIdentity
     {

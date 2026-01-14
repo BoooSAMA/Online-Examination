@@ -15,7 +15,7 @@ namespace Online_Examination.Domain
 
         // --- 外键：老师 ---
         public string CreatorId { get; set; }
-        public User? Creator { get; set; }
+        public Online_ExaminationUser? Creator { get; set; }
 
         // --- 导航属性 ---
         public List<Question> Questions { get; set; } = new List<Question>();

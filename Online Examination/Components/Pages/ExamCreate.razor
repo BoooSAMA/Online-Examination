@@ -1,4 +1,59 @@
-﻿<h3>ExamCreate</h3>
+﻿@page "/create-exam"
+
+<header class="navbar">
+    <h2>Create New Exam</h2>
+</header>
+
+<section class="exam-container">
+
+    <div class="exam-details">
+        <h3>Exam Information</h3>
+
+        <label>Exam Name</label>
+        <input type="text" placeholder="e.g. Mathematics Mock Test">
+
+        <label>Category</label>
+        <select>
+            <option>Primary School</option>
+            <option>Secondary School</option>
+            <option>Polytechnic / JC</option>
+        </select>
+
+        <label>Time Given (minutes)</label>
+        <input type="number" placeholder="60">
+    </div>
+
+    <div class="questions-section">
+        <h3>Questions</h3>
+
+        <div class="question-box">
+            <textarea placeholder="Enter question here"></textarea>
+            <input type="number" placeholder="Marks">
+        </div>
+
+        <div class="question-box">
+            <textarea placeholder="Enter question here"></textarea>
+            <input type="number" placeholder="Marks">
+        </div>
+
+        <button class="add-question">+ Add Question</button>
+
+        <div class="total-marks">
+            <strong>Total Marks:</strong> 100
+        </div>
+
+        <a href="/modify-exams" class="create-btn">Create Exam</a>
+
+        <p style="font-size:12px; color:#aaa; margin-top:10px;">
+            (UI-first. Next step is to save into Exam + Question tables.)
+        </p>
+    </div>
+
+</section>
+
+<footer>
+    © Examination Board
+</footer>
 
 @code {
 

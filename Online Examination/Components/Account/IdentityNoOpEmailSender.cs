@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Domain;
+using Online_Examination.Domain;
 
 namespace Online_Examination.Components.Account
 {

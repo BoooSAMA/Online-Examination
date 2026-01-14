@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Online_Examination.Domain;
 using System.Reflection;
 
-namespace Online_Examination.Domain
+namespace Online_Examination.Data
 {
     /// <summary>
     /// 应用程序数据库上下文
@@ -49,22 +50,20 @@ namespace Online_Examination.Domain
             // ⚠️ 注意：标准的 Online_ExaminationUser (生成代码) 可能没有 CreatedDate/ModifiedDate 属性。
             // 如果你还没有在 Online_ExaminationUser.cs 中添加这些属性，下面这段代码会报错。
             // 建议：如果你需要记录用户的创建时间，请去 Online_ExaminationUser.cs 添加这两个属性。
-            /* var userEntries = ChangeTracker.Entries<Online_ExaminationUser>();
+            var userEntries = ChangeTracker.Entries<Online_ExaminationUser>();
 
             foreach (var entry in userEntries)
             {
                 if (entry.State == EntityState.Added)
                 {
-                    // 确保 Online_ExaminationUser 类里有这些字段
-                    // entry.Entity.CreatedDate = DateTime.Now; 
-                    // entry.Entity.ModifiedDate = DateTime.Now;
+                    entry.Entity.CreatedDate = DateTime.Now;
+                    entry.Entity.ModifiedDate = DateTime.Now;
                 }
                 else if (entry.State == EntityState.Modified)
                 {
-                    // entry.Entity.ModifiedDate = DateTime.Now;
+                    entry.Entity.ModifiedDate = DateTime.Now;
                 }
             }
-            */
 
             return base.SaveChangesAsync(cancellationToken);
         }
@@ -86,7 +85,6 @@ namespace Online_Examination.Domain
             modelBuilder.Entity<Online_ExaminationUser>(entity =>
             {
                 // 1. 配置审计字段 (如果你的 User 类里加了这些字段，请取消注释)
-                /*
                 entity.Property(u => u.CreatedDate)
                     .IsRequired()
                     .HasDefaultValueSql("GETDATE()");
@@ -94,7 +92,6 @@ namespace Online_Examination.Domain
                 entity.Property(u => u.ModifiedDate)
                     .IsRequired()
                     .HasDefaultValueSql("GETDATE()");
-                */
 
                 // 2. 配置 Role 字段 (如果你的 User 类里加了这个字段)
                 // ⚠️ Identity 默认使用 UserRoles 表，不建议在 User 表里直接存 Role 字符串。
@@ -122,5 +119,6 @@ namespace Online_Examination.Domain
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }
+    public DbSet<Online_Examination.Domain.User> User { get; set; } = default!;
     }
 }

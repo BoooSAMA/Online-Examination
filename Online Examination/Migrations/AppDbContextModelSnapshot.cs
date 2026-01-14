@@ -10,7 +10,7 @@ using Online_Examination.Data;
 
 namespace OnlineExamination.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(Online_ExaminationContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

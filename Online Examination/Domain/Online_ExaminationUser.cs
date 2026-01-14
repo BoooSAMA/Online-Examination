@@ -22,5 +22,11 @@ namespace Online_Examination.Domain
         // ==========================================
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime ModifiedDate { get; set; } = DateTime.Now;
+
+        // ==========================================
+        // 3. 角色字段
+        // 为了与现有登录逻辑兼容，添加了 Role 属性
+        // ==========================================
+        public string Role { get; set; } = "Student";
     }
 }
