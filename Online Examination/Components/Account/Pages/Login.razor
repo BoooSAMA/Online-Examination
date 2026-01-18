@@ -1,5 +1,6 @@
 ﻿@page "/Account/Login"
 @layout EmptyLayout
+@inject NavigationManager NavigationManager
 
 <PageTitle>Login | Examination Board</PageTitle>
 
@@ -18,6 +19,13 @@
 <div class="login-page">
     <div class="login-box">
         <h1>Login</h1>
+
+        @if (showResetSuccessMessage)
+        {
+            <div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+                <i class="bi bi-check-circle-fill"></i> <strong>Password reset successfully!</strong> You can now log in with your new password.
+            </div>
+        }
 
         <form action="/api/Login" method="post">
             <label>Email</label>
@@ -52,3 +60,20 @@
 <footer>
     © Examination Board
 </footer>
+
+@code {
+    private bool showResetSuccessMessage = false;
+
+    protected override void OnInitialized()
+    {
+        // Check if coming from password reset success
+        var uri = new Uri(NavigationManager.Uri);
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        
+        if (queryParams["reset"] == "success")
+        {
+            showResetSuccessMessage = true;
+        }
+    }
+}
+
