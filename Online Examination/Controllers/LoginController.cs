@@ -28,33 +28,36 @@ namespace Online_Examination.Controllers
                 return BadRequest("Email and password are required.");
             }
 
+            // ? FIX: Find user by email first, then use their UserName for sign-in
+            var user = await _userManager.FindByEmailAsync(email);
+            
+            if (user == null)
+            {
+                return BadRequest("Invalid login attempt.");
+            }
+
+            // ? Use the user's actual UserName (not the email) for sign-in
             var result = await _signInManager.PasswordSignInAsync(
-                email,
+                user.UserName!,  // Use fetched UserName instead of email
                 password,
                 isPersistent: false,
                 lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                // Get user to determine role-based redirect
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user != null)
+                // Get user roles to determine redirect
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault() ?? user.Role ?? "Student";
+
+                // Redirect based on role
+                if (role == "Admin")
                 {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    var role = roles.FirstOrDefault() ?? user.Role ?? "Student";
-
-                    // Redirect based on role
-                    if (role == "Admin")
-                    {
-                        return Redirect("/admin-dashboard");
-                    }
-                    else
-                    {
-                        return Redirect("/user-dashboard");
-                    }
+                    return Redirect("/admin-dashboard");
                 }
-
-                return Redirect("/");
+                else
+                {
+                    return Redirect("/user-dashboard");
+                }
             }
 
             return BadRequest("Invalid login attempt.");
