@@ -70,17 +70,29 @@
                                         </div>
 
                                         <div class="col-md-6 mb-3">
+                                            <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                                            <InputSelect id="subject" class="form-select" @bind-Value="exam.Subject">
+                                                <option value="@ExamSubject.General">General Knowledge</option>
+                                                <option value="@ExamSubject.Mathematics">Mathematics</option>
+                                                <option value="@ExamSubject.Physics">Physics (Science & Nature)</option>
+                                                <option value="@ExamSubject.ComputerScience">Computer Science</option>
+                                                <option value="@ExamSubject.History">History</option>
+                                            </InputSelect>
+                                            <small class="form-text text-muted">Select the subject area for this exam.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
                                             <label for="level" class="form-label">Education Level <span class="text-danger">*</span></label>
                                             <InputSelect id="level" class="form-select" @bind-Value="exam.Level">
                                                 <option value="@EducationLevel.PSLE">PSLE</option>
                                                 <option value="@EducationLevel.N_O_Level">N/O Level</option>
                                                 <option value="@EducationLevel.Poly">Polytechnic</option>
+                                                <option value="@EducationLevel.JuniorCollege">Junior College (JC)</option>
                                             </InputSelect>
                                             <small class="form-text text-muted">Select the target education level for this exam.</small>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="timeLimit" class="form-label">Time Limit (minutes) <span class="text-danger">*</span></label>
                                             <InputNumber id="timeLimit" class="form-control" @bind-Value="exam.TimeLimitMinutes" placeholder="60" />
@@ -123,9 +135,17 @@
                             <div class="card mb-4">
                                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Questions (@exam.Questions.Count)</h5>
-                                    <button type="button" class="btn btn-sm btn-success" @onclick="AddQuestion">
-                                        <i class="bi bi-plus-circle"></i> Add Question
-                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-success me-2" @onclick="AddQuestion">
+                                            <i class="bi bi-plus-circle"></i> Add Question
+                                        </button>
+                                        @if (exam.Questions.Any())
+                                        {
+                                            <button type="button" class="btn btn-sm btn-danger" @onclick="DeleteAllQuestions">
+                                                <i class="bi bi-trash"></i> Delete All
+                                            </button>
+                                        }
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     @if (!exam.Questions.Any())
@@ -285,6 +305,16 @@
         if (exam != null)
         {
             exam.Questions.Remove(question);
+        }
+    }
+
+    private void DeleteAllQuestions()
+    {
+        if (exam != null && exam.Questions.Any())
+        {
+            exam.Questions.Clear();
+            successMessage = "All questions deleted successfully!";
+            System.Diagnostics.Debug.WriteLine("[ModifyExam] All questions cleared");
         }
     }
 

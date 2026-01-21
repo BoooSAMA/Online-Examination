@@ -1,0 +1,253 @@
+@page "/admin/global-history"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@inject ExamService ExamService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+@using Online_Examination.Domain
+@using Online_Examination.Services
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+<PageTitle>Student Performance Report | Examination Board</PageTitle>
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="bi bi-graph-up"></i> Student Performance Report</h3>
+                <a href="/admin-dashboard" class="btn btn-sm btn-light">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading performance data...</p>
+                </div>
+            }
+            else if (!allAttempts.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No student attempts found yet. Students will appear here once they start taking exams.
+                </div>
+            }
+            else
+            {
+                <!-- Search/Filter Section -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Search by student name, email, or exam title..." 
+                                   @bind="searchTerm" @bind:event="oninput" />
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="badge bg-primary fs-6 p-2">
+                            Total Attempts: @filteredAttempts.Count()
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Total Students</h6>
+                                <h3 class="mb-0">@totalStudents</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Total Exams</h6>
+                                <h3 class="mb-0">@totalExamsAttempted</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Average Score</h6>
+                                <h3 class="mb-0">@averageScore.ToString("F1")%</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-1">Completion Rate</h6>
+                                <h3 class="mb-0">100%</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attempts Table -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>Exam Title</th>
+                                <th>Subject</th>
+                                <th>Level</th>
+                                <th>Score</th>
+                                <th>Date Completed</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attempt in filteredAttempts)
+                            {
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-person-circle text-primary"></i>
+                                        @(attempt.User?.UserName ?? "Unknown")
+                                    </td>
+                                    <td>@(attempt.User?.Email ?? "N/A")</td>
+                                    <td>
+                                        <strong>@(attempt.Exam?.Title ?? "N/A")</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@(attempt.Exam?.Subject.ToString() ?? "N/A")</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@(FormatEducationLevel(attempt.Exam?.Level))</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetScoreBadgeClass(CalculateScorePercentage(attempt)) fs-6">
+                                            @CalculateScorePercentage(attempt).ToString("F1")%
+                                        </span>
+                                    </td>
+                                    <td>@attempt.DateCreated.ToString("MMM dd, yyyy HH:mm")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                @onclick="() => ViewDetails(attempt.Id)">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (!filteredAttempts.Any())
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> No results match your search criteria.
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+private List<Attempt> allAttempts = new();
+private string searchTerm = string.Empty;
+private bool isLoading = true;
+private double averageScore = 0;
+private int totalStudents = 0;
+private int totalExamsAttempted = 0;
+
+private IEnumerable<Attempt> filteredAttempts => 
+    string.IsNullOrWhiteSpace(searchTerm) 
+    ? allAttempts.OrderByDescending(a => a.DateCreated)
+    : allAttempts.Where(a => 
+        (a.User?.UserName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+        (a.User?.Email?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+        (a.Exam?.Title?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+    ).OrderByDescending(a => a.DateCreated);
+
+protected override async Task OnInitializedAsync()
+{
+    try
+    {
+        isLoading = true;
+
+        // Fetch all attempts with related data
+        allAttempts = await ExamService.GetAllAttemptsWithDetailsAsync();
+
+        // Calculate statistics
+        if (allAttempts.Any())
+        {
+            // FIXED: Count distinct users properly
+            totalStudents = allAttempts
+                .Where(a => !string.IsNullOrEmpty(a.UserId))
+                .Select(a => a.UserId)
+                .Distinct()
+                .Count();
+
+            // Count distinct exams
+            totalExamsAttempted = allAttempts
+                .Select(a => a.ExamId)
+                .Distinct()
+                .Count();
+
+            // Calculate average score
+            averageScore = allAttempts.Average(a => CalculateScorePercentage(a));
+        }
+
+        System.Diagnostics.Debug.WriteLine($"[GlobalHistory] Loaded {allAttempts.Count} attempts");
+        System.Diagnostics.Debug.WriteLine($"[GlobalHistory] Total Students: {totalStudents}");
+        System.Diagnostics.Debug.WriteLine($"[GlobalHistory] Total Exams: {totalExamsAttempted}");
+    }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"[GlobalHistory] Error: {ex.Message}");
+    }
+    finally
+    {
+        isLoading = false;
+    }
+}
+
+    private double CalculateScorePercentage(Attempt attempt)
+    {
+        if (attempt.Exam?.Questions == null || !attempt.Exam.Questions.Any())
+        {
+            return 0;
+        }
+
+        int totalQuestions = attempt.Exam.Questions.Count;
+        return (double)attempt.Score / totalQuestions * 100;
+    }
+
+    private string GetScoreBadgeClass(double score)
+    {
+        return score switch
+        {
+            >= 80 => "bg-success",
+            >= 60 => "bg-primary",
+            >= 40 => "bg-warning text-dark",
+            _ => "bg-danger"
+        };
+    }
+
+    private string FormatEducationLevel(EducationLevel? level)
+    {
+        return level switch
+        {
+            EducationLevel.PSLE => "PSLE",
+            EducationLevel.N_O_Level => "N/O Level",
+            EducationLevel.Poly => "Poly",
+            EducationLevel.JuniorCollege => "JC",
+            _ => "N/A"
+        };
+    }
+
+    private void ViewDetails(int attemptId)
+    {
+        Navigation.NavigateTo($"/exam-result/{attemptId}");
+    }
+}

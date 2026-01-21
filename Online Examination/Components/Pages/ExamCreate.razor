@@ -3,11 +3,15 @@
 @inject ExamService ExamService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IHttpClientFactory HttpClientFactory
 @rendermode InteractiveServer
 
 @using Online_Examination.Domain
 @using Online_Examination.Services
 @using Microsoft.AspNetCore.Components.Authorization
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Web
 
 <PageTitle>Create New Exam | Examination Board</PageTitle>
 
@@ -52,23 +56,38 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="level" class="form-label">Education Level <span class="text-danger">*</span></label>
-                                        <InputSelect id="level" class="form-select" @bind-Value="newExam.Level">
-                                            <option value="@EducationLevel.PSLE">PSLE</option>
-                                            <option value="@EducationLevel.N_O_Level">N/O Level</option>
-                                            <option value="@EducationLevel.Poly">Polytechnic</option>
+                                        <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                                        <InputSelect id="subject" class="form-select" @bind-Value="newExam.Subject">
+                                            <option value="@ExamSubject.General">General Knowledge</option>
+                                            <option value="@ExamSubject.Mathematics">Mathematics</option>
+                                            <option value="@ExamSubject.Physics">Physics (Science & Nature)</option>
+                                            <option value="@ExamSubject.ComputerScience">Computer Science</option>
+                                            <option value="@ExamSubject.History">History</option>
                                         </InputSelect>
-                                        <small class="form-text text-muted">Select the target education level for this exam.</small>
+                                        <small class="form-text text-muted">Select the subject area for this exam.</small>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label for="level" class="form-label">Education Level <span class="text-danger">*</span></label>
+                                        <InputSelect id="level" class="form-select" @bind-Value="newExam.Level">
+                                            <option value="@EducationLevel.PSLE">PSLE</option>
+                                            <option value="@EducationLevel.N_O_Level">N/O Level</option>
+                                            <option value="@EducationLevel.Poly">Polytechnic</option>
+                                            <option value="@EducationLevel.JuniorCollege">Junior College (JC)</option>
+                                        </InputSelect>
+                                        <small class="form-text text-muted">Select the target education level for this exam.</small>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="timeLimit" class="form-label">Time Limit (minutes) <span class="text-danger">*</span></label>
                                         <InputNumber id="timeLimit" class="form-control" @bind-Value="newExam.TimeLimitMinutes" placeholder="60" />
                                         <ValidationMessage For="@(() => newExam.TimeLimitMinutes)" />
                                     </div>
+                                </div>
 
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="accessCode" class="form-label">Access Code <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -103,11 +122,44 @@
 
                         <!-- Questions Section -->
                         <div class="card mb-4">
-                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Questions (@questions.Count)</h5>
-                                <button type="button" class="btn btn-sm btn-success" @onclick="AddQuestion">
-                                    <i class="bi bi-plus-circle"></i> Add Question
-                                </button>
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="mb-0">Questions (@questions.Count)</h5>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <label class="mb-0 small text-muted">Difficulty:</label>
+                                            <select class="form-select form-select-sm" style="width: auto;" @bind="selectedApiDifficulty">
+                                                <option value="easy">Easy (PSLE)</option>
+                                                <option value="medium">Medium (N/O Level)</option>
+                                                <option value="hard">Hard (Poly)</option>
+                                                <option value="expert">Expert (JC)</option>
+                                            </select>
+                                            <button type="button" class="btn btn-sm btn-info" @onclick="ImportQuestionsAsync" disabled="@isImporting">
+                                                @if (isImporting)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                                    <span>Generating...</span>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-robot"></i>
+                                                    <span>Generate 5 Questions</span>
+                                                }
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success" @onclick="AddQuestion">
+                                                <i class="bi bi-plus-circle"></i> Add Question
+                                            </button>
+                                            @if (questions.Any())
+                                            {
+                                                <button type="button" class="btn btn-sm btn-danger" @onclick="DeleteAllQuestions">
+                                                    <i class="bi bi-trash"></i> Delete All
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body">
                                 @if (!questions.Any())
@@ -206,11 +258,13 @@
 </div>
 
 @code {
-    private Exam newExam = new Exam();
-    private List<Question> questions = new List<Question>();
-    private string errorMessage = string.Empty;
-    private string successMessage = string.Empty;
-    private bool isSaving = false;
+private Exam newExam = new Exam();
+private List<Question> questions = new List<Question>();
+private string errorMessage = string.Empty;
+private string successMessage = string.Empty;
+private bool isSaving = false;
+private bool isImporting = false;
+private string selectedApiDifficulty = "easy";
 
     protected override async Task OnInitializedAsync()
     {
@@ -250,6 +304,185 @@
     private void RemoveQuestion(Question question)
     {
         questions.Remove(question);
+    }
+
+    private void DeleteAllQuestions()
+    {
+        if (questions.Any())
+        {
+            questions.Clear();
+            successMessage = "All questions deleted successfully!";
+            System.Diagnostics.Debug.WriteLine("[ExamCreate] All questions cleared");
+        }
+    }
+
+    // Question Import Logic - Local Generator for Math, API for Others
+    private async Task ImportQuestionsAsync()
+    {
+        isImporting = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        try
+        {
+            // Check if Mathematics - use local generator
+            if (newExam.Subject == ExamSubject.Mathematics)
+            {
+                System.Diagnostics.Debug.WriteLine("========================================");
+                System.Diagnostics.Debug.WriteLine($"[LocalMath] Generating math questions...");
+                System.Diagnostics.Debug.WriteLine($"[LocalMath] Difficulty: {selectedApiDifficulty}");
+                System.Diagnostics.Debug.WriteLine($"[LocalMath] Count: 5");
+
+                var mathQuestions = LocalMathGenerator.GenerateQuestions(selectedApiDifficulty, 5);
+
+                foreach (var question in mathQuestions)
+                {
+                    questions.Add(question);
+                }
+
+                successMessage = $"✅ Generated {mathQuestions.Count} Mathematics questions locally (Difficulty: {selectedApiDifficulty})!";
+                System.Diagnostics.Debug.WriteLine($"[LocalMath] ✅ Successfully generated {mathQuestions.Count} questions");
+                System.Diagnostics.Debug.WriteLine("========================================");
+                return;
+            }
+
+            // For other subjects, use The Trivia API
+            // Map ExamSubject to The Trivia API Categories
+            string category = newExam.Subject switch
+            {
+                ExamSubject.Physics => "science",
+                ExamSubject.ComputerScience => "science",
+                ExamSubject.History => "history",
+                ExamSubject.General => "general_knowledge",
+                _ => "general_knowledge"
+            };
+
+            // Map difficulty for API (The Trivia API only has 3 levels, so map "expert" to "hard")
+            string apiDifficulty = selectedApiDifficulty == "expert" ? "hard" : selectedApiDifficulty;
+
+            System.Diagnostics.Debug.WriteLine("========================================");
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Generating questions...");
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Subject: {newExam.Subject}");
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Category: {category}");
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Selected Difficulty: {selectedApiDifficulty}");
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] API Difficulty (mapped): {apiDifficulty}");
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Education Level: {newExam.Level} (not used for API)");
+
+            // Call The Trivia API with selected difficulty and subject category
+            var httpClient = HttpClientFactory.CreateClient();
+            var apiUrl = $"https://the-trivia-api.com/v2/questions?limit=5&categories={category}&difficulties={apiDifficulty}";
+            
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] API URL: {apiUrl}");
+
+            var response = await httpClient.GetAsync(apiUrl);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Response received: {json.Substring(0, Math.Min(100, json.Length))}...");
+
+            var triviaQuestions = JsonSerializer.Deserialize<List<TriviaApiQuestion>>(json, new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true 
+            });
+
+            if (triviaQuestions == null || !triviaQuestions.Any())
+            {
+                errorMessage = "No questions received from API. Please try again.";
+                System.Diagnostics.Debug.WriteLine("[TriviaAPI] ❌ No results in response");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Processing {triviaQuestions.Count} questions...");
+
+            // Convert API results to Question objects
+            int importedCount = 0;
+            foreach (var result in triviaQuestions)
+            {
+                // Get question text from nested object
+                var questionText = result.Question?.Text ?? string.Empty;
+                
+                if (string.IsNullOrWhiteSpace(questionText))
+                {
+                    System.Diagnostics.Debug.WriteLine("[TriviaAPI] ⚠️ Skipping question with empty text");
+                    continue;
+                }
+
+                var correctAnswer = result.CorrectAnswer ?? string.Empty;
+                var incorrectAnswers = result.IncorrectAnswers ?? new List<string>();
+
+                if (string.IsNullOrWhiteSpace(correctAnswer) || incorrectAnswers.Count < 3)
+                {
+                    System.Diagnostics.Debug.WriteLine("[TriviaAPI] ⚠️ Skipping question with invalid answers");
+                    continue;
+                }
+
+                // Create list of all answers and shuffle them
+                var allAnswers = new List<string> { correctAnswer };
+                allAnswers.AddRange(incorrectAnswers);
+                
+                // Shuffle the answers using Fisher-Yates algorithm
+                var random = new Random();
+                for (int i = allAnswers.Count - 1; i > 0; i--)
+                {
+                    int j = random.Next(i + 1);
+                    var temp = allAnswers[i];
+                    allAnswers[i] = allAnswers[j];
+                    allAnswers[j] = temp;
+                }
+
+                // Find which position the correct answer ended up in
+                int correctIndex = allAnswers.IndexOf(correctAnswer);
+                string correctAnswerLetter = ((char)('A' + correctIndex)).ToString();
+
+                System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Question: {questionText}");
+                System.Diagnostics.Debug.WriteLine($"[TriviaAPI] Correct answer at position: {correctAnswerLetter}");
+
+                // Create Question object
+                var question = new Question
+                {
+                    Text = questionText,
+                    OptionA = allAnswers[0],
+                    OptionB = allAnswers[1],
+                    OptionC = allAnswers[2],
+                    OptionD = allAnswers[3],
+                    CorrectAnswer = correctAnswerLetter
+                };
+
+                questions.Add(question);
+                importedCount++;
+            }
+
+            if (importedCount == 0)
+            {
+                errorMessage = "Could not import any valid questions. Please try again.";
+                System.Diagnostics.Debug.WriteLine("[TriviaAPI] ❌ No valid questions imported");
+                return;
+            }
+
+            successMessage = $"✅ Successfully imported {importedCount} {newExam.Subject} questions from API (Difficulty: {selectedApiDifficulty})!";
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] ✅ Successfully imported {importedCount} questions");
+            System.Diagnostics.Debug.WriteLine("========================================");
+        }
+        catch (HttpRequestException httpEx)
+        {
+            errorMessage = $"Network error: Unable to reach The Trivia API. {httpEx.Message}";
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] ❌ HTTP Error: {httpEx.Message}");
+        }
+        catch (JsonException jsonEx)
+        {
+            errorMessage = $"Error parsing API response: {jsonEx.Message}";
+            System.Diagnostics.Debug.WriteLine($"[TriviaAPI] ❌ JSON Error: {jsonEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error importing questions: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"[Question Import] ❌ General Error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Question Import] Stack Trace: {ex.StackTrace}");
+        }
+        finally
+        {
+            isImporting = false;
+        }
     }
 
     private async Task HandleSaveExam()
@@ -309,5 +542,30 @@
     private void Cancel()
     {
         Navigation.NavigateTo("/exam-index");
+    }
+
+    // Helper classes for The Trivia API JSON deserialization
+    private class TriviaApiQuestion
+    {
+        [JsonPropertyName("category")]
+        public string Category { get; set; } = string.Empty;
+
+        [JsonPropertyName("question")]
+        public QuestionObject? Question { get; set; }
+
+        [JsonPropertyName("correctAnswer")]
+        public string CorrectAnswer { get; set; } = string.Empty;
+
+        [JsonPropertyName("incorrectAnswers")]
+        public List<string> IncorrectAnswers { get; set; } = new();
+
+        [JsonPropertyName("difficulty")]
+        public string Difficulty { get; set; } = string.Empty;
+    }
+
+    private class QuestionObject
+    {
+        [JsonPropertyName("text")]
+        public string Text { get; set; } = string.Empty;
     }
 }

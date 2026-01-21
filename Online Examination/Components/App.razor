@@ -14,6 +14,98 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Generic Chart Render Function -->
+    <script>
+        window.renderChart = (canvasId, type, labels, data, title, colors) => {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) {
+                console.error('Canvas element not found: ' + canvasId);
+                return;
+            }
+
+            // Destroy existing chart if it exists
+            if (window[canvasId] && window[canvasId] instanceof Chart) {
+                window[canvasId].destroy();
+            }
+
+            // Create new chart
+            window[canvasId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: type === 'line' ? '#4e73df' : colors,
+                        borderWidth: type === 'line' ? 3 : 1,
+                        fill: type === 'line' ? false : true,
+                        tension: type === 'line' ? 0.4 : 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: type === 'pie' ? 'bottom' : 'top',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (type === 'pie') {
+                                        label += context.parsed + ' students';
+                                    } else {
+                                        label += context.parsed.toFixed(1) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: type === 'line' ? {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    } : {}
+                }
+            });
+
+            console.log('Chart rendered successfully: ' + canvasId);
+        };
+    </script>
 </body>
 
 </html>

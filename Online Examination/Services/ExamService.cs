@@ -48,6 +48,7 @@ namespace Online_Examination.Services
             existingExam.TimeLimitMinutes = exam.TimeLimitMinutes;
             existingExam.IsPublished = exam.IsPublished;
             existingExam.Level = exam.Level;
+            existingExam.Subject = exam.Subject;
 
             if (!string.IsNullOrWhiteSpace(exam.AccessCode) && exam.AccessCode != existingExam.AccessCode)
             {
@@ -255,6 +256,16 @@ namespace Online_Examination.Services
                     .ThenInclude(e => e.Questions)
                 .Include(a => a.User)
                 .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.DateCreated)
+                .ToListAsync();
+        }
+
+        public async Task<List<Attempt>> GetAllAttemptsWithDetailsAsync()
+        {
+            return await _context.Attempts
+                .Include(a => a.Exam)
+                    .ThenInclude(e => e.Questions)
+                .Include(a => a.User)
                 .OrderByDescending(a => a.DateCreated)
                 .ToListAsync();
         }

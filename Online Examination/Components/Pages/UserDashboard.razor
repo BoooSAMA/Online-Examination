@@ -2,10 +2,13 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Student")]
 @inject ExamService ExamService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 @using Online_Examination.Services
+@using Online_Examination.Domain
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.JSInterop
 
 <PageTitle>Student Dashboard | Examination Board</PageTitle>
 
@@ -41,7 +44,7 @@
 
     <!-- Secondary Actions -->
     <div class="row mb-4">
-        <div class="col-md-6 mb-3">
+        <div class="col-lg-6 mx-auto mb-3">
             <div class="card border-0 shadow-sm h-100 hover-lift">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -59,28 +62,6 @@
                     <a href="/exam-history" class="btn btn-outline-success w-100">
                         <i class="bi bi-list-ul"></i> View History
                     </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100 hover-lift">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-info bg-opacity-10 rounded p-3 me-3">
-                            <i class="bi bi-graph-up text-info" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-1">My Performance</h4>
-                            <p class="text-muted small mb-0">See your academic progress</p>
-                        </div>
-                    </div>
-                    <p class="text-muted mb-3">
-                        View detailed analytics of your exam performance
-                    </p>
-                    <button class="btn btn-outline-info w-100" disabled>
-                        <i class="bi bi-bar-chart"></i> Coming Soon
-                    </button>
                 </div>
             </div>
         </div>
@@ -127,6 +108,136 @@
         </div>
     }
 
+    <!-- My Performance Analytics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3 text-dark">
+                <i class="bi bi-graph-up text-success"></i> My Performance Analytics
+            </h3>
+
+            <!-- Refresh Button -->
+            @if (totalAttemptsCount > 0)
+            {
+                <div class="mb-3">
+                    <button class="btn btn-outline-secondary btn-sm" @onclick="ManualRefreshCharts" disabled="@isRefreshing">
+                        @if (isRefreshing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <span>Refreshing...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-arrow-clockwise"></i>
+                            <span>Refresh</span>
+                        }
+                    </button>
+                    @if (!string.IsNullOrEmpty(refreshMessage))
+                    {
+                        <small class="ms-2 text-success">@refreshMessage</small>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- My Performance Distribution Pie Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm bg-white">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0 text-dark">
+                        <i class="bi bi-pie-chart-fill text-primary"></i> My Grade Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (isLoadingStats)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Loading your performance data...</p>
+                        </div>
+                    }
+                    else if (totalAttemptsCount == 0)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Complete your first exam to see your grade distribution.
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="height: 350px;" class="@(hasChartData ? "" : "d-none")">
+                            <canvas id="studentPieChart"></canvas>
+                        </div>
+                        @if (!hasChartData)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Not enough data to display chart. Complete more exams.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> Based on your @totalAttemptsCount exams
+                                </small>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- My Score Progress Line Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm bg-white">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0 text-dark">
+                        <i class="bi bi-graph-up-arrow text-success"></i> My Score Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (isLoadingStats)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Calculating your progress...</p>
+                        </div>
+                    }
+                    else if (totalAttemptsCount == 0)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Take your first exam to start tracking your progress.
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="height: 350px;" class="@(hasChartData ? "" : "d-none")">
+                            <canvas id="studentLineChart"></canvas>
+                        </div>
+                        @if (!hasChartData)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Not enough data to display trend. Complete more exams.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i> Your last @trendData.Count exams
+                                </small>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Instructions -->
     <div class="row">
         <div class="col-lg-8 mx-auto">
@@ -165,14 +276,90 @@
 
 @code {
     private string userName = "Student";
+    private string currentUserId = "";
     private int totalAttemptsCount = 0;
     private int averageScore = 0;
     private int bestScore = 0;
     private bool isLoadingStats = true;
+    private bool isRefreshing = false;
+    private bool hasChartData = false;
+    private string refreshMessage = "";
+    private Dictionary<string, int> performanceData = new();
+    private Dictionary<string, double> trendData = new();
+    private List<Attempt> userAttempts = new();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadUserData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine($"[StudentDashboard] OnAfterRenderAsync - firstRender");
+            Console.WriteLine($"[StudentDashboard] Current User ID: {currentUserId}");
+            Console.WriteLine($"[StudentDashboard] Has chart data: {hasChartData}");
+            Console.WriteLine($"[StudentDashboard] Performance data count: {performanceData.Count}");
+            Console.WriteLine($"[StudentDashboard] Trend data count: {trendData.Count}");
+
+            if (hasChartData)
+            {
+                // Add small delay to ensure DOM is fully ready
+                await Task.Delay(100);
+                await RenderCharts();
+            }
+            else
+            {
+                Console.WriteLine($"[StudentDashboard] ⚠️ No chart data to render. Attempts: {totalAttemptsCount}");
+            }
+        }
+    }
+
+    private async Task ManualRefreshCharts()
+    {
+        try
+        {
+            isRefreshing = true;
+            refreshMessage = "";
+            StateHasChanged();
+
+            Console.WriteLine($"[StudentDashboard] 🔄 Manual refresh triggered by user");
+            Console.WriteLine($"[StudentDashboard] User ID: {currentUserId}");
+            Console.WriteLine($"[StudentDashboard] Total Attempts: {totalAttemptsCount}");
+            Console.WriteLine($"[StudentDashboard] Has Chart Data: {hasChartData}");
+
+            if (!hasChartData)
+            {
+                Console.WriteLine($"[StudentDashboard] ⚠️ No chart data available for rendering");
+                refreshMessage = "No data available for charts";
+                return;
+            }
+
+            // Small delay to ensure UI updates
+            await Task.Delay(200);
+
+            // Attempt to render charts
+            await RenderCharts();
+
+            refreshMessage = "✓ Charts refreshed successfully!";
+            Console.WriteLine($"[StudentDashboard] ✅ Manual refresh completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[StudentDashboard] ❌ Manual refresh error: {ex.Message}");
+            refreshMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isRefreshing = false;
+            StateHasChanged();
+
+            // Clear message after 3 seconds
+            await Task.Delay(3000);
+            refreshMessage = "";
+            StateHasChanged();
+        }
     }
 
     private async Task LoadUserData()
@@ -180,6 +367,7 @@
         try
         {
             isLoadingStats = true;
+            Console.WriteLine("[StudentDashboard] Starting to load user data...");
 
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
@@ -187,20 +375,36 @@
             if (user.Identity?.IsAuthenticated == true)
             {
                 userName = user.Identity.Name ?? "Student";
-                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
 
-                if (!string.IsNullOrEmpty(userId))
+                Console.WriteLine($"[StudentDashboard] User authenticated");
+                Console.WriteLine($"[StudentDashboard] User Name: {userName}");
+                Console.WriteLine($"[StudentDashboard] User ID: {currentUserId}");
+                Console.WriteLine($"[StudentDashboard] User Email: {user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value}");
+
+                if (!string.IsNullOrEmpty(currentUserId))
                 {
-                    var attempts = await ExamService.GetUserAttemptsAsync(userId);
-                    totalAttemptsCount = attempts.Count;
+                    userAttempts = await ExamService.GetUserAttemptsAsync(currentUserId);
+                    totalAttemptsCount = userAttempts.Count;
 
-                    if (attempts.Any())
+                    Console.WriteLine($"[StudentDashboard] ✅ Found {totalAttemptsCount} attempts for user ID: {currentUserId}");
+
+                    if (totalAttemptsCount == 0)
                     {
+                        Console.WriteLine($"[StudentDashboard] ⚠️ WARNING: No attempts found for this user!");
+                        Console.WriteLine($"[StudentDashboard] This could mean:");
+                        Console.WriteLine($"[StudentDashboard]   - User has not taken any exams yet");
+                        Console.WriteLine($"[StudentDashboard]   - User ID mismatch between authentication and database");
+                    }
+
+                    if (userAttempts.Any())
+                    {
+                        // Calculate basic stats
                         var totalScore = 0;
                         var totalPossible = 0;
                         var bestPercentage = 0.0;
 
-                        foreach (var attempt in attempts)
+                        foreach (var attempt in userAttempts)
                         {
                             var examQuestions = attempt.Exam?.Questions?.Count ?? 0;
                             if (examQuestions > 0)
@@ -222,17 +426,171 @@
                         }
 
                         bestScore = (int)Math.Round(bestPercentage);
+
+                        Console.WriteLine($"[StudentDashboard] Average Score: {averageScore}%");
+                        Console.WriteLine($"[StudentDashboard] Best Score: {bestScore}%");
+
+                        // Calculate performance distribution (Grade-based)
+                        var gradeGroups = userAttempts
+                            .Where(a => a.Exam?.Questions != null && a.Exam.Questions.Any())
+                            .Select(a => new
+                            {
+                                Attempt = a,
+                                Percentage = (double)a.Score / a.Exam.Questions.Count * 100
+                            })
+                            .GroupBy(x => GetGrade(x.Percentage))
+                            .ToDictionary(g => g.Key, g => g.Count());
+
+                        performanceData = gradeGroups;
+                        Console.WriteLine($"[StudentDashboard] Performance Data: {string.Join(", ", performanceData.Select(x => $"{x.Key}={x.Value}"))}");
+
+                        // Calculate score trend over time
+                        var trendGroups = userAttempts
+                            .Where(a => a.Exam?.Questions != null && a.Exam.Questions.Any())
+                            .OrderBy(a => a.DateCreated)
+                            .Take(10) // Last 10 attempts
+                            .Select((a, index) => new
+                            {
+                                Label = $"Exam {index + 1}",
+                                Score = (double)a.Score / a.Exam.Questions.Count * 100
+                            })
+                            .ToDictionary(x => x.Label, x => x.Score);
+
+                        trendData = trendGroups;
+                        Console.WriteLine($"[StudentDashboard] Trend Data: {string.Join(", ", trendData.Select(x => $"{x.Key}={x.Value:F1}"))}");
+
+                        // Set flag to indicate we have data to render charts
+                        hasChartData = performanceData.Any() && trendData.Any();
+                        Console.WriteLine($"[StudentDashboard] Has chart data: {hasChartData}");
+
+                        if (!hasChartData)
+                        {
+                            Console.WriteLine($"[StudentDashboard] ⚠️ WARNING: Insufficient data for charts");
+                            Console.WriteLine($"[StudentDashboard]   - Performance data entries: {performanceData.Count}");
+                            Console.WriteLine($"[StudentDashboard]   - Trend data entries: {trendData.Count}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("[StudentDashboard] No attempts found for user (empty list).");
                     }
                 }
+                else
+                {
+                    Console.WriteLine("[StudentDashboard] ❌ ERROR: User ID is null or empty!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[StudentDashboard] ❌ ERROR: User is not authenticated!");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading user data: {ex.Message}");
+            Console.WriteLine($"[StudentDashboard] ❌ ERROR loading user data: {ex.Message}");
+            Console.WriteLine($"[StudentDashboard] Stack trace: {ex.StackTrace}");
         }
         finally
         {
             isLoadingStats = false;
+            Console.WriteLine("[StudentDashboard] Finished loading user data.");
+        }
+    }
+
+    private string GetGrade(double percentage)
+    {
+        return percentage switch
+        {
+            >= 80 => "Excellent (A)",
+            >= 60 => "Good (B)",
+            >= 50 => "Pass (C)",
+            _ => "Fail (F)"
+        };
+    }
+
+    private async Task RenderCharts()
+    {
+        try
+        {
+            Console.WriteLine("[StudentDashboard] 📊 Starting to render charts...");
+            Console.WriteLine($"[StudentDashboard] Performance data: {performanceData.Count} entries");
+            Console.WriteLine($"[StudentDashboard] Trend data: {trendData.Count} entries");
+
+            // Render Performance Pie Chart
+            if (performanceData.Any())
+            {
+                Console.WriteLine($"[StudentDashboard] Rendering pie chart with {performanceData.Count} data points");
+                
+                var pieLabels = performanceData.Keys.ToArray();
+                var pieData = performanceData.Values.ToArray();
+                var pieColors = new[]
+                {
+                    "rgba(75, 192, 192, 0.8)",   // Teal for Excellent
+                    "rgba(54, 162, 235, 0.8)",   // Blue for Good
+                    "rgba(255, 206, 86, 0.8)",   // Yellow for Pass
+                    "rgba(255, 99, 132, 0.8)"    // Red for Fail
+                };
+
+                Console.WriteLine($"[StudentDashboard] Pie labels: {string.Join(", ", pieLabels)}");
+                Console.WriteLine($"[StudentDashboard] Pie data: {string.Join(", ", pieData)}");
+
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("renderChart", 
+                        "studentPieChart", "pie", pieLabels, pieData, 
+                        "My Grade Distribution", pieColors);
+                    
+                    Console.WriteLine("[StudentDashboard] ✅ Pie chart rendered successfully");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[StudentDashboard] ❌ Error rendering pie chart: {ex.Message}");
+                    throw;
+                }
+            }
+            else
+            {
+                Console.WriteLine("[StudentDashboard] ⚠️ No performance data to render pie chart");
+            }
+
+            // Render Score Progress Line Chart
+            if (trendData.Any())
+            {
+                Console.WriteLine($"[StudentDashboard] Rendering line chart with {trendData.Count} data points");
+                
+                var lineLabels = trendData.Keys.ToArray();
+                var lineData = trendData.Values.ToArray();
+                var lineColors = new[] { "rgba(78, 115, 223, 0.2)" };
+
+                Console.WriteLine($"[StudentDashboard] Line labels: {string.Join(", ", lineLabels)}");
+                Console.WriteLine($"[StudentDashboard] Line data: {string.Join(", ", lineData.Select(d => d.ToString("F1")))}");
+
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("renderChart", 
+                        "studentLineChart", "line", lineLabels, lineData, 
+                        "My Score Progress", lineColors);
+                    
+                    Console.WriteLine("[StudentDashboard] ✅ Line chart rendered successfully");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[StudentDashboard] ❌ Error rendering line chart: {ex.Message}");
+                    throw;
+                }
+            }
+            else
+            {
+                Console.WriteLine("[StudentDashboard] ⚠️ No trend data to render line chart");
+            }
+
+            Console.WriteLine("[StudentDashboard] ✅ Finished rendering charts.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[StudentDashboard] ❌ FATAL ERROR in RenderCharts: {ex.Message}");
+            Console.WriteLine($"[StudentDashboard] Stack trace: {ex.StackTrace}");
+            throw;
         }
     }
 }

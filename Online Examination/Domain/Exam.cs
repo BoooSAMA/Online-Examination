@@ -7,7 +7,17 @@ namespace Online_Examination.Domain
     {
         PSLE = 0,
         N_O_Level = 1,
-        Poly = 2
+        Poly = 2,
+        JuniorCollege = 3
+    }
+
+    public enum ExamSubject
+    {
+        General = 0,
+        Mathematics = 1,
+        Physics = 2,
+        ComputerScience = 3,
+        History = 4
     }
 
     [Index(nameof(AccessCode), IsUnique = true)]
@@ -29,6 +39,8 @@ namespace Online_Examination.Domain
         public bool IsPublished { get; set; } = false;
 
         public EducationLevel Level { get; set; } = EducationLevel.PSLE;
+
+        public ExamSubject Subject { get; set; } = ExamSubject.General;
 
         // --- 外键：老师 ---
         public string CreatorId { get; set; }

@@ -27,6 +27,8 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddHttpContextAccessor();
 
+// HttpClient for external API calls (e.g., Open Trivia Database)
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped(sp =>
 {
