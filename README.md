@@ -1,3 +1,5 @@
+[中文版](README_CN.md)
+
 # Online Examination
 
 An **ASP.NET Core Blazor Interactive Server** web application for creating and taking online examinations. Built with C#, Entity Framework Core, and SQL Server.
