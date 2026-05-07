@@ -1,3 +1,5 @@
+[English](README.md)
+
 # Online Examination（在线考试系统）
 
 基于 **ASP.NET Core Blazor Interactive Server** 的在线考试 Web 应用。使用 C#、Entity Framework Core 和 SQL Server 构建。
