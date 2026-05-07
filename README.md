@@ -305,4 +305,4 @@ Online-Examination/
 
 ## License
 
-This project is open source. Add a license file if you intend to distribute it.
+This project is open source. Using MIT license.
